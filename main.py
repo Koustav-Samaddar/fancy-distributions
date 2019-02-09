@@ -1,4 +1,5 @@
 
+import time
 import random
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,11 +33,14 @@ def pairing(arr):
 
 
 def main():
-	dist = left_right_stay(size=1000000)
+	start = time.time()
+	dist = left_right_stay(size=100000000)
 	pairs = pairing(dist)
 
 	x, y = list(zip(*pairs))
-	plt.plot(x, y, 'kx')
+	end = time.time()
+	print("Time Elapsed: {0:.2f}s".format(end - start))
+	plt.plot(x, y, '-kx')
 	plt.show()
 
 
