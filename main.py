@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from itertools import chain
+from scipy.stats import norm
 from multiprocessing import Pool
 
 
@@ -23,6 +24,7 @@ def let_the_man_walk(center, weight_array, num):
 				break
 
 	return distribution
+
 
 def left_right_stay(size=100, center=0, weights=(1, 1, 1)):
 	num_threads = 4
@@ -57,21 +59,32 @@ def pairing(arr):
 
 def main():
 	start = time.time()
-	dist = left_right_stay(size=1000000, weights=(1, 1))
+	size = 10000000
+	dist = left_right_stay(size=size, weights=(1, 1, 1))
 	pairs = pairing(dist)
 
-	x, y = list(zip(*pairs))
+	x, y = zip(*pairs)
+	y = [ i / size for i in y ]
+
+	mean = np.mean(dist)
+	var = np.var(dist)
+	std = np.std(dist)
 	end = time.time()
 
 	print()
 	print("Stats")
-	print("Average: {0:.2f}".format(np.mean(dist)))
-	print("Std Dev: {0:.2f}".format(np.std(dist)))
+	print("Average: {0:.2f}".format(mean))
+	print("Variance: {0:.2f}".format(var))
+	print("Standard Deviation: {0:.2f}".format(std))
+
 	print()
 	print("Performance")
 	print("Elapsed Time: {0:.2f}s".format(end - start))
 
-	plt.plot(x, y, 'kx')
+	x_axis = np.arange(-100, 100, 0.001)
+	plt.plot(x, y, 'rx')
+	plt.plot(x_axis, norm.pdf(x_axis, mean, std), 'b-')
+
 	plt.xlim((-100, 100))
 	plt.show()
 
