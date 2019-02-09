@@ -4,8 +4,28 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
+from itertools import chain
+from multiprocessing import Pool
+
+
+def let_the_man_walk(center, weight_array, num):
+	distribution = []
+
+	for i in range(num):
+		position = center
+
+		while True:
+			choice = random.choice(weight_array)
+			position += choice
+
+			if choice == 0:
+				distribution.append(position)
+				break
+
+	return distribution
 
 def left_right_stay(size=100, center=0, weights=(1, 1, 1)):
+	num_threads = 4
 
 	if len(weights) == 3:
 		left_weight, center_weight, right_weight = weights
@@ -19,20 +39,15 @@ def left_right_stay(size=100, center=0, weights=(1, 1, 1)):
 		              [0] * center_weight + \
 		              [1] * right_weight
 
-	distribution = []
+	thread_distribution = [int(size / num_threads)] * (num_threads - 1)
+	thread_distribution.append(size - sum(thread_distribution))
 
-	for i in range(size):
-		position = center
+	param_distribution = map(lambda x: (center, weight_array, x), thread_distribution)
 
-		while True:
-			choice = random.choice(weight_array)
-			position += choice
+	with Pool(processes=4) as pool:
+		distribution = pool.starmap(let_the_man_walk, param_distribution)
 
-			if choice == 0:
-				distribution.append(position)
-				break
-
-	return distribution
+	return list(chain(*distribution))
 
 
 def pairing(arr):
@@ -42,7 +57,7 @@ def pairing(arr):
 
 def main():
 	start = time.time()
-	dist = left_right_stay(size=100000, weights=(50, 1))
+	dist = left_right_stay(size=1000000, weights=(1, 1))
 	pairs = pairing(dist)
 
 	x, y = list(zip(*pairs))
